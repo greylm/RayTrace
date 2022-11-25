@@ -1,6 +1,6 @@
 import numpy as np
 
-# simplified Python translation of the ray trace function from the module of the same name in the RADIATE Fortran software
+# ray trace function 
 def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_all, start_lev, n):
 
     # conversion factor for radians to degrees
@@ -41,11 +41,11 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_al
     # variable for storing first radius value at station position
     R.append(R_e + h_lev_all[0]) # in [m]
     # variable for elevation (location dependend)
-    theta = []
+    theta = [] # in [rad]
     # variable for elevation (fixed reference to station position)
-    e = []
+    e = [] # in [rad]
     # variable for the geocentric angle          
-    anggeo = [0]
+    anggeo = [0] # in [rad]
     # variable for the interpolated (at intersection point) mean total refractive indices          
     n_total = []
     # calculate a priori bending effect, see Hobiger et al. 2008, Fast and accurate ray-tracing algorithms for real-time space geodetic applications using numerical weather models, equation (32) on page 9
@@ -67,7 +67,7 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_al
         # calculate elevation angle of ray path at intersection point with current height level
         theta.append(np.arccos( R[i-1] * n_int[i-1] * np.cos(theta[i-1]) / ( R[i] * n_int[i] ) )) # in [rad]
         # calculate geocentric angle to intersection point in current height level
-        anggeo.append(anggeo[i-1] + ( theta[i] - theta[i-1] ) / ( 1 + A[i-1] ))
+        anggeo.append(anggeo[i-1] + ( theta[i] - theta[i-1] ) / ( 1 + A[i-1] )) # in [rad]
         # calculate the new value for A in the current layer
         A.append(( np.log(n_int[i]) - np.log(n_int[i-1]) ) / ( np.log(R[i]) - np.log(R[i-1]) ))
         # difference between "theoretical" outgoing elevation angle and ray-traced outgoing elevation angle
@@ -122,13 +122,13 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_al
 def n_gen(stat_height, h_lev_all, nr_h_lev_all): 
 
     n = [] # list of refractive indices to be generated
-    k1 = 77.60 #K/mb, refractivity constant from Thayer (1974)
-    k2 = 64.9 #K/mb, refractivity constant from Thayer (1974)
-    k3 = 3.776*10**5 #K/mb, refractivity constant from Thayer (1974)
-    pv = [] # mb, list of water vapor partial pressures
-    pd = [] # mb, list of dry air partial pressures
-    T = [] # K, list of temperatures to be generated
-    Tc = [] # C, list of temperatures to be generated
+    k1 = 77.60 # in [K/mb], refractivity constant from Thayer (1974)
+    k2 = 64.9 # in [K/mb], refractivity constant from Thayer (1974)
+    k3 = 3.776*10**5 # in [K**2/mb], refractivity constant from Thayer (1974)
+    pv = [] # in [mb], list of water vapor partial pressures
+    pd = [] # in [mb], list of dry air partial pressures
+    T = [] # in [K], list of temperatures to be generated
+    Tc = [] # in [C], list of temperatures to be generated
     
     for i in range(1,nr_h_lev_all): # loop over all heights above the station
         h_lev_all.append(i*1e3) # add 1 km to the list of heights
@@ -137,7 +137,7 @@ def n_gen(stat_height, h_lev_all, nr_h_lev_all):
             # calculate temperature at the current height level
             T.append(288.15 - 0.0065 * i*1e3) # in [K]
             Tc.append(20 - 0.0065 * i*1e3) # in [C]
-            # calculate partila pressures of water vapor and dry air at the current height level
+            # calculate partial pressures of water vapor and dry air at the current height level
             if (288.15 - 0.0065 * i*1e3) >= 273.15:
                 pv_i = 6.11*np.exp(17.27*(20 - 0.0065 * i*1e3)/(237.3+(20 - 0.0065 * i*1e3))) # in [mb]
             else:
