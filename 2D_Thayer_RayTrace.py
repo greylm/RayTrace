@@ -1,5 +1,6 @@
 import numpy as np
 
+# python translation of the ray trace function from the module of the same name in the RADIATE Fortran software
 def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_all, start_lev, n):
 
     # conversion factor for radians to degrees
@@ -194,7 +195,7 @@ def main():
     start_lev = 1
     # variable for storing list of refractive indices from the n_gen function
     n = n_gen(stat_height, h_lev_all, nr_h_lev_all)
-    # run the ray tracing function
+    # run the ray-tracing function
     get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_all, start_lev, n)
 
 if __name__ == "__main__":
