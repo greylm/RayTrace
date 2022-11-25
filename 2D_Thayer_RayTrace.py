@@ -1,7 +1,7 @@
 import numpy as np
 
 # calculates the slant total delay and geometric bending effect over a given number of height levels
-def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_all, start_lev, n):
+def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_h_lev_all, start_lev, n):
 
     # conversion factor for radians to degrees
     rad2deg = 180/np.pi
@@ -25,11 +25,11 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_al
     epsilon_layer = 0
     # variable for counting the number of iteration loops when calculating the intersection point
     loop_layer = 0
-    # variable for storing height differences between two consecutive levels
+    # variable for storing all height differences between two consecutive levels
     dh = [] # in [m]
     # loop to add all of the height differences between layers
     for i in range(nr_h_lev_all - 1):
-        dh.append(1e3)
+        dh.append(h_diff)
     # variable for storing the slant distance for each ray path section between two consecutive levels used for slant delay calculation
     s = [] # in [m]
     ## determine output of number of height levels starting at station level up to highest supported height level
@@ -130,43 +130,43 @@ def n_gen(stat_height, h_lev_all, nr_h_lev_all):
     Tc = [] # in [C], list of temperatures to be generated
     
     for i in range(1,nr_h_lev_all): # loop over all heights above the station
-        h_lev_all.append(i*1e3) # add 1 km to the list of heights
+        h_lev_all.append(i*h_diff) # add 1 km to the list of heights
         #height level cutoffs below are determined from the International Standard Atmosphere
-        if i*1e3 <= 11000: # 0 - ground to tropopause
+        if i*h_diff <= 11000: # 0 - ground to tropopause
             # calculate temperature at the current height level
-            T.append(288.15 - 0.0065 * i*1e3) # in [K]
-            Tc.append(20 - 0.0065 * i*1e3) # in [C]
+            T.append(288.15 - 0.0065 * i*h_diff) # in [K]
+            Tc.append(20 - 0.0065 * i*h_diff) # in [C]
             # calculate partial pressures of water vapor and dry air at the current height level
-            if (288.15 - 0.0065 * i*1e3) >= 273.15:
-                pv_i = 6.11*np.exp(17.27*(20 - 0.0065 * i*1e3)/(237.3+(20 - 0.0065 * i*1e3))) # in [mb]
+            if (288.15 - 0.0065 * i*h_diff) >= 273.15:
+                pv_i = 6.11*np.exp(17.27*(20 - 0.0065 * i*h_diff)/(237.3+(20 - 0.0065 * i*h_diff))) # in [mb]
             else:
-                pv_i = 6.11*np.exp(21.875*(20 - 0.0065 * i*1e3)/(265.5+(20 - 0.0065 * i*1e3))) # in [mb]
+                pv_i = 6.11*np.exp(21.875*(20 - 0.0065 * i*h_diff)/(265.5+(20 - 0.0065 * i*h_diff))) # in [mb]
             pv.append(pv_i)
-            pd.append(1013.25 * ( (288.15 + (i*1e3 - 0) * 0.0065) / 288.15)**(-9.81*0.0289644/(8.3144598*0.0065)) - pv_i) # in [mb]
-        elif i*1e3 <= 20000: # 1 - tropopause to stratosphere1
+            pd.append(1013.25 * ( (288.15 + (i*h_diff - 0) * 0.0065) / 288.15)**(-9.81*0.0289644/(8.3144598*0.0065)) - pv_i) # in [mb]
+        elif i*h_diff <= 20000: # 1 - tropopause to stratosphere1
             T.append(216.65)
             Tc.append(-56.5)
-            pd.append(226.321*np.exp( (-9.81*0.0289644*(i*1e3 - 11e3)/(8.3144598*216.65))))
+            pd.append(226.321*np.exp( (-9.81*0.0289644*(i*h_diff - 11e3)/(8.3144598*216.65))))
             pv.append(0) # water vapor pressure is set to zero above the tropopause to simplify calculations due to most water vapor existing below it
-        elif i*1e3 <= 32000: # 2 - stratosphere1 to stratosphere2
-            T.append(216.65 + 0.001*i*1e3)
-            Tc.append(-56.5 + 0.001*i*1e3)
-            pd.append(54.749 * ( (216.65 + (i*1e3 - 20e3) * -0.001) / 216.65)**(-9.81*0.0289644/(8.3144598*-0.001)) - pv_i)
+        elif i*h_diff <= 32000: # 2 - stratosphere1 to stratosphere2
+            T.append(216.65 + 0.001*i*h_diff)
+            Tc.append(-56.5 + 0.001*i*h_diff)
+            pd.append(54.749 * ( (216.65 + (i*h_diff - 20e3) * -0.001) / 216.65)**(-9.81*0.0289644/(8.3144598*-0.001)) - pv_i)
             pv.append(0)
-        elif i*1e3 <= 47000: # 3 - stratosphere2 to stratopause
-            T.append(228.65 + 0.0028*i*1e3)
-            Tc.append(-44.5 + 0.0028*i*1e3)
-            pd.append(8.6802 * ( (228.65 + (i*1e3 - 32e3) * -0.0028) / 228.65)**(-9.81*0.0289644/(8.3144598*-0.0028)) - pv_i)
+        elif i*h_diff <= 47000: # 3 - stratosphere2 to stratopause
+            T.append(228.65 + 0.0028*i*h_diff)
+            Tc.append(-44.5 + 0.0028*i*h_diff)
+            pd.append(8.6802 * ( (228.65 + (i*h_diff - 32e3) * -0.0028) / 228.65)**(-9.81*0.0289644/(8.3144598*-0.0028)) - pv_i)
             pv.append(0)
-        elif i*1e3 <= 51000: # 4 - stratopause to mesophere1
+        elif i*h_diff <= 51000: # 4 - stratopause to mesophere1
             T.append(270.65)
             Tc.append(-2.5)
-            pd.append(1.1091*np.exp( (-9.81*0.0289644*(i*1e3 - 47e3)/(8.3144598*270.65))))
+            pd.append(1.1091*np.exp( (-9.81*0.0289644*(i*h_diff - 47e3)/(8.3144598*270.65))))
             pv.append(0)
-        elif i*1e3 <= 71000: # 5 - mesosphere1 to mesosphere2
-            T.append(270.65 - 0.0028*i*1e3)
-            Tc.append(-2.5 - 0.0028*i*1e3)
-            pd.append(0.66939 * ( (270.65 + (i*1e3 - 51e3) * 0.0028) / 270.65)**(-9.81*0.0289644/(8.3144598*0.0028)) - pv_i)
+        elif i*h_diff <= 71000: # 5 - mesosphere1 to mesosphere2
+            T.append(270.65 - 0.0028*i*h_diff)
+            Tc.append(-2.5 - 0.0028*i*h_diff)
+            pd.append(0.66939 * ( (270.65 + (i*h_diff - 51e3) * 0.0028) / 270.65)**(-9.81*0.0289644/(8.3144598*0.0028)) - pv_i)
             pv.append(0)
             
     for i in range(nr_h_lev_all - 1):
@@ -188,14 +188,16 @@ def main():
     stat_height = 0 # in [m]
     # variable for storing (ellipsoidal) height levels in which the intersection points with the ray path should be estimated; in [m]
     h_lev_all = [stat_height] # in [m]
-    # variable for storing total number of available height levels (from vertical interpolation/extrapolation)
+    # variable for storing the height difference between levels for constant differences
+    h_diff = 1e3 # in [m]
+    # variable for storing total number of available height levels
     nr_h_lev_all = 72
     # variable for storing index of first height level in "h_lev_all" above station height (needed for ray-tracing start above station)
     start_lev = 1
     # variable for storing list of refractive indices from the n_gen function
-    n = n_gen(stat_height, h_lev_all, nr_h_lev_all)
+    n = n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all)
     # run the ray-tracing function
-    get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_all, start_lev, n)
+    get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_h_lev_all, start_lev, n)
 
 if __name__ == "__main__":
     main()
