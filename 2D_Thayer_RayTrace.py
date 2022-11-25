@@ -27,7 +27,7 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_al
     loop_layer = 0
     # variable for storing height differences between two consecutive levels
     dh = [] # in [m]
-    # loop to add all of the height
+    # loop to add all of the height differences between layers
     for i in range(nr_h_lev_all - 1):
         dh.append(1e3)
     # variable for storing the slant distance for each ray path section between two consecutive levels used for slant delay calculation
