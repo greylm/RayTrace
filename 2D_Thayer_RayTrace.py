@@ -71,8 +71,7 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_al
         # calculate the new value for A in the current layer
         A.append(( np.log(n_int[i]) - np.log(n_int[i-1]) ) / ( np.log(R[i]) - np.log(R[i-1]) ))
         # difference between "theoretical" outgoing elevation angle and ray-traced outgoing elevation angle
-        # note: The ray-traced outgoing elevation angle is the elevation angle value of the uppermost ray-traced level, which is using equation (2.72) from scriptum Atmospheric Effects in Geodesy 2012 on page 37:
-        #       theta(uppermost level) - anggeo(uppermost level).
+        # note: The ray-traced outgoing elevation angle is the elevation angle value of the uppermost ray-traced level, which is using equation (2.72) from scriptum Atmospheric Effects in Geodesy 2012 on page 37: theta(uppermost level) - anggeo(uppermost level).
         diff_e = e_outgoing - (theta[-1] - anggeo[-1]) # in [rad]
         # determine new starting elevation angle at the station based on the difference between "theoretical" and ray-traced outgoing elevation angle
         theta_start = theta_start + diff_e # in [rad]
