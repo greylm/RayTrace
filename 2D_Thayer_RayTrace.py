@@ -59,7 +59,7 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_al
     loop_elev = 0
         
     # loop over all remaining height levels
-    for i in range(1,nr_h_lev-1): # just nr_h_lev?
+    for i in range(1,nr_h_lev-1):
         # add the new radius at the current height level to the list of radii
         R.append(R[0]+h_lev_all[i])  
         # calculate intersection points using modified "Thayer" Approximation
@@ -67,7 +67,7 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_al
         theta.append(np.arccos( R[i-1] * n_int[i-1] * np.cos(theta[i-1]) / ( R[i] * n_int[i] ) )) # in [rad]
         # calculate geocentric angle to intersection point in current height level
         anggeo.append(anggeo[i-1] + ( theta[i] - theta[i-1] ) / ( 1 + A[i-1] ))
-        # calculate the new value for A in the current layer (i+1)
+        # calculate the new value for A in the current layer
         A.append(( np.log(n_int[i]) - np.log(n_int[i-1]) ) / ( np.log(R[i]) - np.log(R[i-1]) ))
         # difference between "theoretical" outgoing elevation angle and ray-traced outgoing elevation angle
         # note: The ray-traced outgoing elevation angle is the elevation angle value of the uppermost ray-traced level, which is using equation (2.72) from scriptum Atmospheric Effects in Geodesy 2012 on page 37:
@@ -83,7 +83,7 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_al
     # define outgoing elevation angle (location independent). Note: this is the elevation angle value of the uppermost ray-traced level
     e_outgoing_rt = e[-1] # in [rad]
     # loop over all remaining height levels
-    for i in range(1,nr_h_lev - 1): # -1?
+    for i in range(1,nr_h_lev - 1):
         # determine mean total slant refractive indices between two consecutive levels for slant delay calculation using the slant ray path distances
         n_total.append(( n_int[i] + n_int[i-1] ) / 2)
         # note: as earth radius "R_e" is constant, it is sufficient to directly use the "h_lev" values
@@ -101,7 +101,7 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_al
     # otherwise set the slant delay equal to the zenith delay value
     else:
         # set slant total delay
-        ds_total = 0 #
+        ds_total = 0 # in [m]
     
     # Calculate geometric bending effect, see scriptum Atmospheric Effects in Geodesy 2012, equation (2.75) on page 38
     dgeo = 0
@@ -133,14 +133,16 @@ def n_gen(stat_height, h_lev_all, nr_h_lev_all):
         h_lev_all.append(i*1e3) # add 1 km to the list of heights
         #height level cutoffs below are determined from the International Standard Atmosphere
         if i*1e3 <= 11000: # 0 - ground to tropopause
-            T.append(288.15 - 0.0065 * i*1e3)
-            Tc.append(20 - 0.0065 * i*1e3)
+            # calculate temperature at the current height level
+            T.append(288.15 - 0.0065 * i*1e3) # in [K]
+            Tc.append(20 - 0.0065 * i*1e3) # in [C]
+            # calculate partila pressures of water vapor and dry air at the current height level
             if (288.15 - 0.0065 * i*1e3) >= 273.15:
-                pv_i = 6.11*np.exp(17.27*(20 - 0.0065 * i*1e3)/(237.3+(20 - 0.0065 * i*1e3)))
+                pv_i = 6.11*np.exp(17.27*(20 - 0.0065 * i*1e3)/(237.3+(20 - 0.0065 * i*1e3))) # in [mb]
             else:
-                pv_i = 6.11*np.exp(21.875*(20 - 0.0065 * i*1e3)/(265.5+(20 - 0.0065 * i*1e3)))
+                pv_i = 6.11*np.exp(21.875*(20 - 0.0065 * i*1e3)/(265.5+(20 - 0.0065 * i*1e3))) # in [mb]
             pv.append(pv_i)
-            pd.append(1013.25 * ( (288.15 + (i*1e3 - 0) * 0.0065) / 288.15)**(-9.81*0.0289644/(8.3144598*0.0065)) - pv_i)
+            pd.append(1013.25 * ( (288.15 + (i*1e3 - 0) * 0.0065) / 288.15)**(-9.81*0.0289644/(8.3144598*0.0065)) - pv_i) # in [mb]
         elif i*1e3 <= 20000: # 1 - tropopause to stratosphere1
             T.append(216.65)
             Tc.append(-56.5)
