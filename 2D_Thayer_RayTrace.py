@@ -1,6 +1,6 @@
 import numpy as np
 
-# ray trace function 
+# calculates the slant total delay and geometric bending effect over a given number of height levels
 def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_all, start_lev, n):
 
     # conversion factor for radians to degrees
