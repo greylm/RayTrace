@@ -118,7 +118,7 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_
     return ds_total_geom
         
 # calculates the refractive indices for a predefined number of 1 km height levels above sea level
-def n_gen(stat_height, h_lev_all, nr_h_lev_all): 
+def n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all): 
 
     n = [] # list of refractive indices to be generated
     k1 = 77.60 # in [K/mb], refractivity constant from Thayer (1974)
