@@ -1,6 +1,6 @@
 import numpy as np
 
-# modified Python translation of the ray trace function from the module of the same name in the RADIATE Fortran software
+# simplified Python translation of the ray trace function from the module of the same name in the RADIATE Fortran software
 def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, nr_h_lev_all, start_lev, n):
 
     # conversion factor for radians to degrees
