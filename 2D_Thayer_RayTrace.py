@@ -176,7 +176,10 @@ def n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all):
         Zv_inv = 1+1650*(pv[i]/T[i]**3)*(1-0.01317*Tc[i]+1.75*10**(-4)*Tc[i]**2+1.44*10**(-6)*Tc[i]**3) 
         # refractivity and refractive index from the above variables
         N = k1*pd[i]/T[i]*Zd_inv+k2*pv[i]/T[i]*Zv_inv+k3*pv[i]/T[i]**2*Zv_inv
-        n.append(N*10**(-6)+1)
+        if N*10**(-6) > 0:
+            n.append(N*10**(-6)+1)
+        else:
+            n.append(1)
         
     return n
         
