@@ -25,17 +25,12 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_
     epsilon_layer = 0
     # variable for counting the number of iteration loops when calculating the intersection point
     loop_layer = 0
-    # variable for storing all height differences between two consecutive levels
-    dh = [] # in [m]
-    # loop to add all of the height differences between layers
-    for i in range(nr_h_lev_all - 1):
-        dh.append(h_diff)
     # variable for storing the slant distance for each ray path section between two consecutive levels used for slant delay calculation
     s = [] # in [m]
     ## determine output of number of height levels starting at station level up to highest supported height level
     nr_h_lev = nr_h_lev_all #- start_lev + 2 # note: +2 as station height level and "start_lev" are also needed
     # variable for storing the radius of the Earth at the station position
-    R_e = 6371423 # in [m]
+    R_e = 6371424 # in [m]
     ## Note: Adding the Earth radius calculated at the station's latitude to all height levels is sufficient, although it is an approximation as the radius changes as the ray path alters its latitude
     # Therefore a strict solution would need an iterative step to do ray-tracing, re-determine the radius and do ray-tracing and so on until a certain accuracy would be reached.
     # variable for storing first radius value at station position
