@@ -151,12 +151,12 @@ def n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all):
         elif i*h_diff <= 32000: # 2 - stratosphere1 to stratosphere2
             T.append(216.65 + 0.001*i*h_diff)
             Tc.append(-56.5 + 0.001*i*h_diff)
-            pd.append(54.749 * ( (216.65 + (i*h_diff - 20e3) * -0.001) / 216.65)**(-9.81*0.0289644/(8.3144598*-0.001)) - pv_i)
+            pd.append(54.749 * ( (216.65 + (i*h_diff - 20e3) * -0.001) / 216.65)**(-9.81*0.0289644/(8.3144598*-0.001)))
             pv.append(0)
         elif i*h_diff <= 47000: # 3 - stratosphere2 to stratopause
             T.append(228.65 + 0.0028*i*h_diff)
             Tc.append(-44.5 + 0.0028*i*h_diff)
-            pd.append(8.6802 * ( (228.65 + (i*h_diff - 32e3) * -0.0028) / 228.65)**(-9.81*0.0289644/(8.3144598*-0.0028)) - pv_i)
+            pd.append(8.6802 * ( (228.65 + (i*h_diff - 32e3) * -0.0028) / 228.65)**(-9.81*0.0289644/(8.3144598*-0.0028)))
             pv.append(0)
         elif i*h_diff <= 51000: # 4 - stratopause to mesophere1
             T.append(270.65)
@@ -166,7 +166,7 @@ def n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all):
         elif i*h_diff <= 71000: # 5 - mesosphere1 to mesosphere2
             T.append(270.65 - 0.0028*i*h_diff)
             Tc.append(-2.5 - 0.0028*i*h_diff)
-            pd.append(0.66939 * ( (270.65 + (i*h_diff - 51e3) * 0.0028) / 270.65)**(-9.81*0.0289644/(8.3144598*0.0028)) - pv_i)
+            pd.append(0.66939 * ( (270.65 + (i*h_diff - 51e3) * 0.0028) / 270.65)**(-9.81*0.0289644/(8.3144598*0.0028)))
             pv.append(0)
             
     for i in range(nr_h_lev_all - 1):
