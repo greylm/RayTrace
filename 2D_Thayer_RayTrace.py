@@ -81,8 +81,6 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_
     for i in range(1,nr_h_lev - 1):
         # determine mean total slant refractive indices between two consecutive levels for slant delay calculation using the slant ray path distances
         n_total.append(( n_int[i] + n_int[i-1] ) / 2)
-        # note: as earth radius "R_e" is constant, it is sufficient to directly use the "h_lev" values
-        dh.append( h_lev_all[i] - h_lev_all[i-1])
         # calculation of s for the space between two levels
         s.append(R[i-1] * n_int[i-1] * np.cos(theta[i-1]) / ( 1 + A[i] ) * ( np.tan(theta[i]) - np.tan(theta[i-1]) ))
     
