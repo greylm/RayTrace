@@ -111,7 +111,7 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, n, nr_h_lev
     return ds_total_geom
         
 # calculates the refractive indices for a predefined number of 1 km height levels above sea level
-def n_gen(pres, hght, tmps, dwpt, stat_height, h_lev_all, h_diff, start_lev): 
+def n_gen(pres, hght, tmps, dwpt, stat_height, h_lev_all, h_diff, start_lev, end_lev): 
 
     n = [] # list of refractive indices to be generated
     k1 = 77.60 # in [K/mb], refractivity constant from Thayer (1974)
@@ -136,12 +136,12 @@ def n_gen(pres, hght, tmps, dwpt, stat_height, h_lev_all, h_diff, start_lev):
             pv_i = 6.11*np.exp(21.875*i/(265.5+i)) # in [mb]
         pv.append(pv_i)
 
-    for i in range(start_lev,72): # loop over all heights above the station 
+    for i in range(start_lev,end_lev): # loop over all heights above the station 
         h_lev_all.append(i*h_diff) # add 1 km to the list of heights
         #height level cutoffs below are determined from the International Standard Atmosphere
         if i*h_diff <= 47000: # 3 - stratosphere2 to stratopause
-            T.append(228.65 + 0.0028*i*h_diff)
-            Tc.append(-44.5 + 0.0028*i*h_diff)
+            T.append(228.65 + 0.0028*(i-32)*h_diff)
+            Tc.append(-44.5 + 0.0028*(i-32)*h_diff)
             pd.append(8.6802 * ( (228.65 + (i*h_diff - 32e3) * -0.0028) / 228.65)**(-9.81*0.0289644/(8.3144598*-0.0028)))
             pv.append(0)
         elif i*h_diff <= 51000: # 4 - stratopause to mesophere1
@@ -150,8 +150,8 @@ def n_gen(pres, hght, tmps, dwpt, stat_height, h_lev_all, h_diff, start_lev):
             pd.append(1.1091*np.exp( (-9.81*0.0289644*(i*h_diff - 47e3)/(8.3144598*270.65))))
             pv.append(0)
         elif i*h_diff <= 71000: # 5 - mesosphere1 to mesosphere2
-            T.append(270.65 - 0.0028*i*h_diff)
-            Tc.append(-2.5 - 0.0028*i*h_diff)
+            T.append(270.65 - 0.0028*(i-51)*h_diff)
+            Tc.append(-2.5 - 0.0028*(i-51)*h_diff)
             pd.append(0.66939 * ( (270.65 + (i*h_diff - 51e3) * 0.0028) / 270.65)**(-9.81*0.0289644/(8.3144598*0.0028)))
             pv.append(0)
     
@@ -167,8 +167,8 @@ def n_gen(pres, hght, tmps, dwpt, stat_height, h_lev_all, h_diff, start_lev):
         else:
             n.append(1)
 
-    print(Tc[108:112]) # 108:113
-    print(h_lev_all[109:113]) # 108:113
+    print(Tc[108:112])
+    print(h_lev_all[109:113])
     
     return n
 
@@ -189,8 +189,10 @@ def main():
     h_diff = 1e3 # in [m]
     # variable for storing index of first height level in "h_lev_all" above last radiosonde height
     start_lev = int(hght[-1]//1000 + 1)
+    # variable for storing index of last height level
+    end_lev = 72
     # variable for storing list of refractive indices from the n_gen function
-    n = n_gen(pres, hght, tmps, dwpt, stat_height, h_lev_all, h_diff, start_lev)
+    n = n_gen(pres, hght, tmps, dwpt, stat_height, h_lev_all, h_diff, start_lev, end_lev)
     # variable for storing total number of available height levels
     nr_h_lev_all = len(h_lev_all) # 72 for 1 km ISA
     # run the ray-tracing function
