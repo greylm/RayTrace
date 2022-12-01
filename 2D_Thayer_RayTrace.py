@@ -142,13 +142,13 @@ def n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all):
             pd.append(226.321*np.exp( (-9.81*0.0289644*(i*h_diff - 11e3)/(8.3144598*216.65))))
             pv.append(0) # water vapor pressure is set to zero above the tropopause to simplify calculations due to most water vapor existing below it
         elif i*h_diff <= 32000: # 2 - stratosphere1 to stratosphere2
-            T.append(216.65 + 0.001*i*h_diff)
-            Tc.append(-56.5 + 0.001*i*h_diff)
+            T.append(216.65 + 0.001*(i-20)*h_diff)
+            Tc.append(-56.5 + 0.001*(i-20)*h_diff)
             pd.append(54.749 * ( (216.65 + (i*h_diff - 20e3) * -0.001) / 216.65)**(-9.81*0.0289644/(8.3144598*-0.001)))
             pv.append(0)
         elif i*h_diff <= 47000: # 3 - stratosphere2 to stratopause
-            T.append(228.65 + 0.0028*i*h_diff)
-            Tc.append(-44.5 + 0.0028*i*h_diff)
+            T.append(228.65 + 0.0028*(i-32)*h_diff)
+            Tc.append(-44.5 + 0.0028*(i-32)*h_diff)
             pd.append(8.6802 * ( (228.65 + (i*h_diff - 32e3) * -0.0028) / 228.65)**(-9.81*0.0289644/(8.3144598*-0.0028)))
             pv.append(0)
         elif i*h_diff <= 51000: # 4 - stratopause to mesophere1
@@ -157,12 +157,15 @@ def n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all):
             pd.append(1.1091*np.exp( (-9.81*0.0289644*(i*h_diff - 47e3)/(8.3144598*270.65))))
             pv.append(0)
         elif i*h_diff <= 71000: # 5 - mesosphere1 to mesosphere2
-            T.append(270.65 - 0.0028*i*h_diff)
-            Tc.append(-2.5 - 0.0028*i*h_diff)
+            T.append(270.65 - 0.0028*(i-51)*h_diff)
+            Tc.append(-2.5 - 0.0028*(i-51)*h_diff)
             pd.append(0.66939 * ( (270.65 + (i*h_diff - 51e3) * 0.0028) / 270.65)**(-9.81*0.0289644/(8.3144598*0.0028)))
             pv.append(0)
-            
-    for i in range(nr_h_lev_all - 1):
+
+    print(Tc)
+    print(h_lev_all[1:])
+    
+    for i in range(nr_h_lev_all-1):
         # inverse compressibility factor for dry air from Thayer (1974)
         Zd_inv = 1+pd[i]*((57.90*10**(-8))*(1+0.52/T[i])-(9.4611*10**(-4))*Tc[i]/T[i]**2) 
         # inverse compressibility factor for water vapor from Thayer (1974)
@@ -173,7 +176,7 @@ def n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all):
             n.append(N*10**(-6)+1)
         else:
             n.append(1)
-        
+
     return n
         
 def main():
@@ -189,7 +192,7 @@ def main():
     # variable for storing total number of available height levels
     nr_h_lev_all = 72
     # variable for storing index of first height level in "h_lev_all" above station height (needed for ray-tracing start above station)
-    start_lev = 1
+    start_lev = 1 # unused for now, working on using this and stat_height
     # variable for storing list of refractive indices from the n_gen function
     n = n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all)
     # run the ray-tracing function
