@@ -39,9 +39,9 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_
     theta = [] # in [rad]
     # variable for elevation (fixed reference to station position)
     e = [] # in [rad]
-    # variable for the geocentric angle          
+    # variable for the geocentric angle
     anggeo = [0] # in [rad]
-    # variable for the interpolated (at intersection point) mean total refractive indices          
+    # variable for the interpolated (at intersection point) mean total refractive indices
     n_total = []
     # calculate a priori bending effect, see Hobiger et al. 2008, Fast and accurate ray-tracing algorithms for real-time space geodetic applications using numerical weather models, equation (32) on page 9
     ap_bend = 0.02 * np.exp(-stat_height / 6000) / np.tan(e_outgoing) * deg2rad # in [rad], conversion is necessary
@@ -53,11 +53,11 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_
     diff_e = 100 * accuracy_elev ## in [rad]
     # initialize variable for counting the loop number for calculating the outgoing elevation angle
     loop_elev = 0
-        
+
     # loop over all remaining height levels
     for i in range(1,nr_h_lev-1):
         # add the new radius at the current height level to the list of radii
-        R.append(R[0]+h_lev_all[i])  
+        R.append(R[0]+h_lev_all[i])
         # calculate intersection points using modified "Thayer" Approximation
         # calculate elevation angle of ray path at intersection point with current height level
         theta.append(np.arccos( R[i-1] * n_int[i-1] * np.cos(theta[i-1]) / ( R[i] * n_int[i] ) )) # in [rad]
@@ -72,7 +72,7 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_
         theta_start = theta_start + diff_e # in [rad]
         # calculate elevation angle (fixed reference at first ray point = station position), see scriptum Atmospheric Effects in Geodesy 2012, equation (2.72) on page 37
         e.append(theta[i] - anggeo[i]) # in [rad]
-    
+
     # get starting elevation angle at station
     e_stat = theta[0] # in [rad]
     # define outgoing elevation angle (location independent). Note: this is the elevation angle value of the uppermost ray-traced level
@@ -83,35 +83,35 @@ def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_
         n_total.append(( n_int[i] + n_int[i-1] ) / 2)
         # calculation of s for the space between two levels
         s.append(R[i-1] * n_int[i-1] * np.cos(theta[i-1]) / ( 1 + A[i] ) * ( np.tan(theta[i]) - np.tan(theta[i-1]) ))
-    
+
     # calculate slant delays
     # determine if the elevation at the station is smaller than a specific value, e.g. 89.99°
     # --> calculated slant path (formula: Thayer 1967, equation (17) can be used to calculate the slant delay
     if (e_stat * rad2deg) < 89.99:
-        # calculate slant total delay 
+        # calculate slant total delay
         # note: size of refractive index vectors and dh is equal (nr_h_lev - 1)
         ds_total = np.dot(np.array(n_total)-1, s) # in [m]
     # otherwise set the slant delay equal to the zenith delay value
     else:
         # set slant total delay
         ds_total = 0 # in [m]
-    
+
     # Calculate geometric bending effect, see scriptum Atmospheric Effects in Geodesy 2012, equation (2.75) on page 38
     dgeo = 0
     for i in range(1,nr_h_lev - 2):
         dgeo += (s[i] - (np.cos(e[i] - e_outgoing_rt) * s[i])) # in [m]
-    
+
     # calculate slant total delay + geometric bending effect
     ds_total_geom = ds_total + dgeo # in [m]
-    
+
     # print the delays to console for easy review
-    print("Slant total delay (m):",ds_total)
-    print("Geometric bending effect (m):",dgeo)
+    #print("Slant total delay (m):",ds_total)
+    #print("Geometric bending effect (m):",dgeo)
     print("Combined delay (m):",ds_total_geom)
     return ds_total_geom
-        
+
 # calculates the refractive indices for a predefined number of 1 km height levels above sea level
-def n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all): 
+def n_gen(start_lev, end_lev, h_lev_all, h_diff):
 
     n = [] # list of refractive indices to be generated
     k1 = 77.60 # in [K/mb], refractivity constant from Thayer (1974)
@@ -121,10 +121,11 @@ def n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all):
     pd = [] # in [mb], list of dry air partial pressures
     T = [] # in [K], list of temperatures to be generated
     Tc = [] # in [C], list of temperatures to be generated
-    
-    for i in range(1,nr_h_lev_all): # loop over all heights above the station
+
+    for i in range(start_lev,end_lev): # loop over all heights above the station
         h_lev_all.append(i*h_diff) # add 1 km to the list of heights
         #height level cutoffs below are determined from the International Standard Atmosphere
+        #print(i*h_diff)
         if i*h_diff <= 11000: # 0 - ground to tropopause
             # calculate temperature at the current height level
             T.append(288.15 - 0.0065 * i*h_diff) # in [K]
@@ -166,12 +167,12 @@ def n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all):
             Tc.append(-58.5 - 0.002*(i-71)*h_diff)
             pd.append(0.039564 * ( (214.65 + (i*h_diff - 71e3) * 0.002) / 214.65)**(-9.81*0.0289644/(8.3144598*0.002)))
             pv.append(0)
-    
-    for i in range(nr_h_lev_all-1):
+
+    for i in range(len(h_lev_all)-1):
         # inverse compressibility factor for dry air from Thayer (1974)
-        Zd_inv = 1+pd[i]*((57.90*10**(-8))*(1+0.52/T[i])-(9.4611*10**(-4))*Tc[i]/T[i]**2) 
+        Zd_inv = 1+pd[i]*((57.90*10**(-8))*(1+0.52/T[i])-(9.4611*10**(-4))*Tc[i]/T[i]**2)
         # inverse compressibility factor for water vapor from Thayer (1974)
-        Zv_inv = 1+1650*(pv[i]/T[i]**3)*(1-0.01317*Tc[i]+1.75*10**(-4)*Tc[i]**2+1.44*10**(-6)*Tc[i]**3) 
+        Zv_inv = 1+1650*(pv[i]/T[i]**3)*(1-0.01317*Tc[i]+1.75*10**(-4)*Tc[i]**2+1.44*10**(-6)*Tc[i]**3)
         # refractivity and refractive index from the above variables
         N = k1*pd[i]/T[i]*Zd_inv+k2*pv[i]/T[i]*Zv_inv+k3*pv[i]/T[i]**2*Zv_inv
         if N*10**(-6) > 0:
@@ -180,26 +181,26 @@ def n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all):
             n.append(1)
 
     return n
-        
+
 def main():
-    
-    # variable for storing outgoing (vacuum) elevation angle. Note: this value is arbitrary and can range from >pi/18 to <pi/2
-    e_outgoing = np.pi/4 # in [rad] 
+    # variable for storing outgoing (vacuum) elevation angle in [rad]. Note: this value is arbitrary and can range from >pi/18 to <pi/2
+    e_outgoing = np.pi/4
     # variable for storing (ellipsoidal) height of station in [m]
-    stat_height = 0 # in [m]
+    stat_height = 531.0
     # variable for storing (ellipsoidal) height levels in which the intersection points with the ray path should be estimated; in [m]
-    h_lev_all = [stat_height] # in [m]
+    h_lev_all = []
     # variable for storing the height difference between levels for constant differences
-    h_diff = 0.1e3 # in [m]
-    # variable for storing total number of available height levels
-    nr_h_lev_all = 851
-    # variable for storing index of first height level in "h_lev_all" above station height (needed for ray-tracing start above station)
-    start_lev = 1 # unused for now, working on using this and stat_height
+    h_diff = 0.1e3
+    # variable for storing index of first height level above station height (needed for ray-tracing start above station)
+    start_lev = int(stat_height//h_diff)
+    # variable for storing index of last height level above station height (needed for ray-tracing start above station)
+    end_lev = 851
     # variable for storing list of refractive indices from the n_gen function
-    n = n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all)
+    n = n_gen(start_lev, end_lev, h_lev_all, h_diff)
+    # variable for storing total number of available height levels
+    nr_h_lev_all = len(h_lev_all)
     # run the ray-tracing function
     get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_h_lev_all, n)
 
 if __name__ == "__main__":
     main()
-   
