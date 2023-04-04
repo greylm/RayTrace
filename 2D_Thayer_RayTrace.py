@@ -1,7 +1,7 @@
 import numpy as np
 
 # calculates the slant total delay and geometric bending effect over a given number of height levels
-def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_h_lev_all, start_lev, n):
+def get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_h_lev_all, n):
 
     # conversion factor for radians to degrees
     rad2deg = 180/np.pi
@@ -161,9 +161,11 @@ def n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all):
             Tc.append(-2.5 - 0.0028*(i-51)*h_diff)
             pd.append(0.66939 * ( (270.65 + (i*h_diff - 51e3) * 0.0028) / 270.65)**(-9.81*0.0289644/(8.3144598*0.0028)))
             pv.append(0)
-
-    print(Tc)
-    print(h_lev_all[1:])
+        elif i*h_diff <= 85000: # 6 - mesosphere2 to mesopause
+            T.append(214.65 - 0.002*(i-71)*h_diff)
+            Tc.append(-58.5 - 0.002*(i-71)*h_diff)
+            pd.append(0.039564 * ( (214.65 + (i*h_diff - 71e3) * 0.002) / 214.65)**(-9.81*0.0289644/(8.3144598*0.002)))
+            pv.append(0)
     
     for i in range(nr_h_lev_all-1):
         # inverse compressibility factor for dry air from Thayer (1974)
@@ -188,15 +190,15 @@ def main():
     # variable for storing (ellipsoidal) height levels in which the intersection points with the ray path should be estimated; in [m]
     h_lev_all = [stat_height] # in [m]
     # variable for storing the height difference between levels for constant differences
-    h_diff = 1e3 # in [m]
+    h_diff = 0.1e3 # in [m]
     # variable for storing total number of available height levels
-    nr_h_lev_all = 72
+    nr_h_lev_all = 851
     # variable for storing index of first height level in "h_lev_all" above station height (needed for ray-tracing start above station)
     start_lev = 1 # unused for now, working on using this and stat_height
     # variable for storing list of refractive indices from the n_gen function
     n = n_gen(stat_height, h_lev_all, h_diff, nr_h_lev_all)
     # run the ray-tracing function
-    get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_h_lev_all, start_lev, n)
+    get_RayTrace2D_Thayer_global(e_outgoing, stat_height, h_lev_all, h_diff, nr_h_lev_all, n)
 
 if __name__ == "__main__":
     main()
